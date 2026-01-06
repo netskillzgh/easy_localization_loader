@@ -82,28 +82,28 @@ class SmartNetworkAssetLoader extends AssetLoader {
   }
 
   Future<String> loadFromNetwork(String localeName) async {
-    String url = localeUrl(localeName);
+  String url = localeUrl(localeName);
 
-    url = '$url$localeName.json';
-    try {
-      final response =
-          await Future.any([http.get(Uri.parse(url)), Future.delayed(timeout)]);
+  url = '$url$localeName.json';
+  try {
+    final response =
+        await Future.any([http.get(Uri.parse(url)), Future.delayed(timeout)]);
 
-      if (response != null && response.statusCode == 200) {
-        var content = utf8.decode(response.bodyBytes);
+    if (response != null && response.statusCode == 200) {
+      var content = utf8.decode(response.bodyBytes);
 
-        // check valid json before saving it
-        if (json.decode(content) != null) {
-          await saveTranslation(localeName, content);
-          return content;
-        }
+      // Vérifier que le JSON est valide ET que le contenu fait plus de 1000 caractères
+      if (content.length > 1000 && json.decode(content) != null) {
+        await saveTranslation(localeName, content);
+        return content;
       }
-    } catch (e) {
-      print(e.toString());
     }
-
-    return '';
+  } catch (e) {
+    print(e.toString());
   }
+
+  return '';
+}
 
   Future<bool> localTranslationExists(String localeName,
       {bool ignoreCacheDuration = false}) async {
